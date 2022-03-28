@@ -3,6 +3,7 @@ package dokerplp.calculations
 import dokerplp.equations.Equation
 import dokerplp.equations.EquationSystem
 import dokerplp.exceptions.WrongBoundsException
+import dokerplp.exceptions.WrongFunctionException
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -10,7 +11,7 @@ private fun half(l: Double, r: Double): Double {
     return r - (r - l) / 2
 }
 
-fun bisectionMethod(equation: Equation, epsilon: Double, bounds: Pair<Double, Double>): Double {
+fun bisectionMethod(equation: Equation, epsilon: Double, bounds: Pair<Double, Double>): Pair<Double, Double> {
     var l = bounds.first
     var r = bounds.second
     if (equation(l) * equation(r) > 0) throw WrongBoundsException("Bounds have the same sign")
@@ -20,7 +21,7 @@ fun bisectionMethod(equation: Equation, epsilon: Double, bounds: Pair<Double, Do
         else r = x
         x = half(l, r)
     }
-    return x
+    return Pair(x, abs(equation(x)))
 }
 
 fun correctBounds(equation: Equation, bounds: Pair<Double, Double>): Boolean {
@@ -32,7 +33,7 @@ fun correctBounds(equation: Equation, bounds: Pair<Double, Double>): Boolean {
     return true
 }
 
-fun simpleIterationMethod(equation: Equation, epsilon: Double, bounds: Pair<Double, Double>): Double {
+fun simpleIterationMethod(equation: Equation, epsilon: Double, bounds: Pair<Double, Double>): Pair<Double, Double> {
 
     if (!correctBounds(equation, bounds)) throw WrongBoundsException("Function's derivative must be absolutely less than 1")
 
@@ -42,32 +43,28 @@ fun simpleIterationMethod(equation: Equation, epsilon: Double, bounds: Pair<Doub
 
     while (abs(equation(x)) > epsilon) x = phi(x)
 
-    return x
+    return Pair(x, abs(equation(x)))
 }
 
-fun maxRoot(arr1: Array<Double>, arr2: Array<Double>): Double {
-    var maxVal = Double.MIN_VALUE
-    arr1.indices.forEach { i -> maxVal = max(maxVal, abs(arr1[i] - arr2[i]))}
-    return maxVal
-}
+fun simpleIterationMethod(equationSystem: EquationSystem, epsilon: Double): Pair<Array<Double>, Array<Double>> {
 
+    val arr1 = Array(equationSystem.roots) {0.0}
+    val arr2 = Array(equationSystem.roots) {0.0}
+    val arr3 = Array(equationSystem.roots) {0.0}
 
-fun simpleIterationMethod(equationSystem: EquationSystem, epsilon: Double): Array<Double> {
+    var diff = 0.0
+    do {
+        diff = 0.0
+        for (i in 0 until  equationSystem.roots) arr2[i] = equationSystem(i, arr1)
+        for (i in 0 until equationSystem.roots) diff = max(diff, abs(arr1[i] - arr2[i]))
+        System.arraycopy(arr2, 0, arr1, 0, equationSystem.roots)
+    } while (diff > epsilon)
 
-    val phi = Array(equationSystem.roots) {i -> {x: Array<Double> -> equationSystem(i, x) + x[i]}}
+    for (i in 0 until  equationSystem.roots) arr3[i] = arr2[i] - equationSystem(i, arr1)
 
-    val lastArr = Array(equationSystem.roots) {-1.0}
-    val curArr = Array(equationSystem.roots) {1.0}
-    while (maxRoot(lastArr, curArr) > epsilon) {
-        for (i in lastArr.indices) {
-            lastArr[i] = curArr[i]
-            curArr[i] = phi[i](lastArr)
-        }
-    }
+    for (r in arr1) if (r == Double.NEGATIVE_INFINITY || r == Double.POSITIVE_INFINITY || r.isNaN()) throw WrongFunctionException("Function's derivative must be absolutely less than 1")
 
-    for (r in curArr) if (r == Double.NEGATIVE_INFINITY || r == Double.POSITIVE_INFINITY || r.isNaN()) throw WrongBoundsException("Function's derivative must be absolutely less than 1")
-
-    return curArr
+    return Pair(arr2, arr3)
 }
 
 

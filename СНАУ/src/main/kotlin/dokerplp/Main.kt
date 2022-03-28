@@ -16,29 +16,29 @@ private val equationsList = listOf (
     Equation("ln(2-cos(3x)) - 0.5 = 0", { x -> ln(2.0 - cos(3.0 * x)) - 0.5 }, { x -> (3.0 * sin(3.0 * x)) / (2.0 - cos(3.0 * x))})
 )
 
-private val equationSystemsList = listOf (
-    EquationSystem (
-        2,
-        listOf (
-            Pair("x1^2 + x2^2 - 4 = 0", { (x1, x2) -> x1.pow(2) + x2.pow(2) - 4 }),
-            Pair("x2 - 3*x1^2 = 0", {(x1, x2) -> x2 - 3 * x1.pow(2)})
-        )
-    ),
-    EquationSystem (
-        2,
-        listOf (
-            Pair("x1 + 3*lg(x1) - x2^2 = 0", {(x1, x2) -> x1 + 3 * log10(x1) - x2.pow(2)}),
-            Pair("2*x1^2 - x1*x2 - 5*x1 + 1 = 0", {(x1, x2) -> 2 * x1.pow(2) - x1 * x2 - 5 * x1 + 1})
-        )
-    ),
-    EquationSystem (
+private val equationSystemsList = listOf(
+    EquationSystem(
         3,
-        listOf (
-            Pair("x1^2 + x2^2 + x3^2 - 1 = 0", {(x1, x2, x3) -> x1.pow(2) + x2.pow(2) + x3.pow(2) - 1}),
-            Pair("2*x1^2 + x2^2 - 4*x3^2 = 0", {(x1, x2, x3) -> 2 * x1.pow(2) + x2.pow(2) - 4 * x3.pow(2)}),
-            Pair("3*x1^2 - 4*x2 + x3^2 = 0", {(x1, x2, x3) -> 3 * x1.pow(2) - 4 * x2 + x3.pow(2)})
+        listOf(
+            Pair("0.16 * x2 - 0.08 * x3 + 1.2 - x1 = 0", { (x1, x2, x3) -> 0.16 * x2 - 0.08 * x3 + 1.2 }),
+            Pair("0.2 * x1 - 0.424 * x3 - 1.786 - x2 = 0", { (x1, x2, x3) -> 0.2 * x1 - 0.424 * x3 - 1.786 }),
+            Pair("-0.1389 * x1 - 0.58889 * x2 - 0.0667 - x3 = 0", { (x1, x2, x3) -> -0.1389 * x1 - 0.58889 * x2 - 0.0667 }),
         )
-    )
+    ),
+    EquationSystem(
+        2,
+        listOf(
+            Pair("sin(x1 + 1)- 1.2 - x1 = 0", { (x1, x2) -> sin(x1 + 1) - 1.2 }),
+            Pair("1 - cos(x2) / 2 - x2 = 0", { (x1, x2) -> 1 - cos(x2) / 2 })
+        )
+    ),
+//    EquationSystem(
+//        2,
+//        listOf(
+//            Pair("x1 + 3*lg(x1) - x2^2 = 0", { (x1, x2) -> x1 + 3 * log10(x1) - x2.pow(2) }),
+//            Pair("2*x1^2 - x1*x2 - 5*x1 + 1 = 0", { (x1, x2) -> 2 * x1.pow(2) - x1 * x2 - 5 * x1 + 1 })
+//        )
+//    )
 )
 
 fun equation() {
@@ -59,9 +59,9 @@ fun equation() {
     val m1 = bisectionMethod(equation, epsilon, bounds)
     val m2 = simpleIterationMethod(equation, epsilon, bounds)
 
-    println("\nBisection method: $m1")
-    println("Simple iteration method: $m2")
-    println("Difference: ${abs(m1 - m2)}")
+    println("\nBisection method: ${m1.first}, (discrepancy: ${m1.second})")
+    println("Simple iteration method: ${m2.first}, (discrepancy: ${m1.second})\"")
+    println("Difference: ${abs(m1.first - m2.first)}")
 }
 
 fun equationSystem() {
@@ -81,7 +81,7 @@ fun equationSystem() {
     val roots = simpleIterationMethod(equationSystem, epsilon)
 
     println("Answer: ")
-    (0 until  equationSystem.roots).forEach { i -> println("x${i + 1} = ${roots[i]}") }
+    (0 until  equationSystem.roots).forEach { i -> println("x${i + 1} = ${roots.first[i]} (discrepancy: ${roots.second[i]})") }
 
 }
 

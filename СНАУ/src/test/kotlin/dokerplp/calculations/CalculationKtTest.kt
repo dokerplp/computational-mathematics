@@ -3,6 +3,7 @@ package dokerplp.calculations
 import dokerplp.equations.Equation
 import dokerplp.equations.EquationSystem
 import dokerplp.exceptions.WrongBoundsException
+import dokerplp.exceptions.WrongFunctionException
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
@@ -33,29 +34,27 @@ internal class CalculationKtTest {
 
     private val equationSystemsList = listOf(
         EquationSystem(
-            2,
-            listOf(
-                Pair("x1^2 + x2^2 - 4 = 0", { (x1, x2) -> x1.pow(2.0) + x2.pow(2.0) - 4.0 }),
-                Pair("x2 - 3*x1^2 = 0", { (x1, x2) -> x2 - 3.0 * x1.pow(2.0) })
-            )
-        ),
-        EquationSystem(
-            2,
-            listOf(
-                Pair("x1 + 3*lg(x1) - x2^2 = 0", { (x1, x2) -> x1 + 3.0 * log10(x1) - x2.pow(2.0) }),
-                Pair("2*x1^2 - x1*x2 - 5*x1 + 1 = 0", { (x1, x2) -> 2.0 * x1.pow(2.0) - x1 * x2 - 5.0 * x1 + 1.0 })
-            )
-        ),
-        EquationSystem(
             3,
             listOf(
-                Pair("x1^2 + x2^2 + x3^2 - 1 = 0", { (x1, x2, x3) -> x1.pow(2.0) + x2.pow(2.0) + x3.pow(2.0) - 1.0 }),
-                Pair(
-                    "2*x1^2 + x2^2 - 4*x3^2 = 0",
-                    { (x1, x2, x3) -> 2.0 * x1.pow(2.0) + x2.pow(2.0) - 4.0 * x3.pow(2.0) }),
-                Pair("3*x1^2 - 4*x2 + x3^2 = 0", { (x1, x2, x3) -> 3.0 * x1.pow(2.0) - 4.0 * x2 + x3.pow(2.0) })
+                Pair("0.16 * x2 - 0.08 * x3 + 1.2 - x1 = 0", { (x1, x2, x3) -> 0.16 * x2 - 0.08 * x3 + 1.2 }),
+                Pair("0.2 * x1 - 0.424 * x3 - 1.786 - x2 = 0", { (x1, x2, x3) -> 0.2 * x1 - 0.424 * x3 - 1.786 }),
+                Pair("-0.1389 * x1 - 0.58889 * x2 - 0.0667 - x3 = 0", { (x1, x2, x3) -> -0.1389 * x1 - 0.58889 * x2 - 0.0667 }),
             )
-        )
+        ),
+        EquationSystem(
+            2,
+            listOf(
+                Pair("sin(x1 + 1)- 1.2 - x1 = 0", { (x1, x2) -> sin(x1 + 1) - 1.2 }),
+                Pair("1 - cos(x2) / 2 - x2 = 0", { (x1, x2) -> 1 - cos(x2) / 2 })
+            )
+        ),
+//        EquationSystem(
+//            2,
+//            listOf(
+//                Pair("x1 + 3*lg(x1) - x2^2 = 0", { (x1, x2) -> x1 + 3 * log10(x1) - x2.pow(2) }),
+//                Pair("2*x1^2 - x1*x2 - 5*x1 + 1 = 0", { (x1, x2) -> 2 * x1.pow(2) - x1 * x2 - 5 * x1 + 1 })
+//            )
+//        )
     )
 
     @Test
@@ -148,23 +147,33 @@ internal class CalculationKtTest {
 
         println("Equation system 1:\n${equationSystemsList[0]}")
 
-        assertFailsWith<WrongBoundsException> {
-            val roots = simpleIterationMethod(equationSystemsList[0], 0.001)
-            println("Answer: ")
-            (0 until equationSystemsList[0].roots).forEach { i -> println("x${i + 1} = ${roots[i]}") }
-        }.also { println("Wrong derivative") }
 
+        val r1 = simpleIterationMethod(equationSystemsList[0], 0.001)
+        println("Answer: ")
+        (0 until equationSystemsList[0].roots).forEach { i -> println("x${i + 1} = ${r1.first[i]} (discrepancy: ${r1.second[i]})") }
 
         println("Equation system 2:\n${equationSystemsList[1]}")
-        val roots = simpleIterationMethod(equationSystemsList[1], 0.001)
+        val r2 = simpleIterationMethod(equationSystemsList[1], 0.001)
         println("Answer: ")
-        (0 until equationSystemsList[1].roots).forEach { i -> println("x${i + 1} = ${roots[i]}") }
+        (0 until equationSystemsList[1].roots).forEach { i -> println("x${i + 1} = ${r2.first[i]} (discrepancy: ${r2.second[i]})") }
 
-        println("Equation system 3:\n${equationSystemsList[2]}")
-        assertFailsWith<WrongBoundsException> {
-            val roots = simpleIterationMethod(equationSystemsList[2], 0.001)
-            println("Answer: ")
-            (0 until equationSystemsList[2].roots).forEach { i -> println("x${i + 1} = ${roots[i]}") }
-        }.also { println("Wrong derivative") }
+//        assertFailsWith<WrongFunctionException> {
+//            println("Equation system 3:\n${equationSystemsList[2]}")
+//            val r3 = simpleIterationMethod(equationSystemsList[2], 0.001)
+//            println("Answer: ")
+//            (0 until equationSystemsList[2].roots).forEach { i -> println("x${i + 1} = ${r3.first[i]} (discrepancy: ${r3.second[i]})") }
+//        }.also { println("Wrong function") }
+    }
+
+    @Test
+    fun test() {
+        println("Testing Bisection Method...")
+        bisectionMethodTest()
+        println("\n")
+        println("Testing Simple Iteration Method...")
+        simpleIterationMethodTest()
+        println("\n")
+        println("Testing Simple Iteration Method For System...")
+        simpleIterationMethodForSystemTest()
     }
 }
